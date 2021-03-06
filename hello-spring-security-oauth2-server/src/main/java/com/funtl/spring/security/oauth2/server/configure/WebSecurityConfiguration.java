@@ -3,6 +3,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,14 +22,21 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    @Override
+    public UserDetailsService userDetailsService(){
+        return new UserDetailServiceImpl();
+    }
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService());
     }
 
-    @Bean
+    //增加这个配置
     @Override
-    public UserDetailsService userDetailsService(){
-        return new UserDetailServiceImpl();
+    public void configure(WebSecurity web) throws Exception {
+        //下面这个地址不需要拦截，不写的话访问这个地址会报403
+        web.ignoring().antMatchers("/oauth/check_token");
     }
 }
